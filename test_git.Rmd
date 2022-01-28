@@ -1,0 +1,16 @@
+---
+title: "test_git"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+ggplot(data = penguins, aes(x = bill_length_mm, y = flipper_length_mm, colour = species)) +
+  geom_point()
+```
+
