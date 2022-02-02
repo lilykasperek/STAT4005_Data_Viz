@@ -1,0 +1,80 @@
+---
+title: "quiz 2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Quiz 2 In-Class
+Complete this quiz in a .Rmd file. Question 3 will prompt you to push both a .Rmd file and a knitted .html file to your GitHub site.
+
+Statement of Integrity: Copy and paste the following statement and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this quiz.”
+
+Lily Kasperek
+
+Collaboration Reminder: You may not communicate with or work with anyone else on this quiz, but you may use any of our course materials or materials on the Internet.
+
+We will continue to use the SLU majors data set for this quiz. The following is code to speed things up and get you started with a more clean version of the data.
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(here)
+
+df <- read_excel(here("data 2/slu_graduates_17_21.xlsx"))
+
+df <- df %>% mutate(across(everything(),
+                           .fns = ~replace(., . ==  "STATS" , "STAT")))
+
+
+df_long <- df %>% pivot_longer(3:8, names_to = "type", values_to = "discipline")
+
+df_major <- df_long %>% 
+  filter(type == "major1" | type == "major2" | type == "major3")
+```
+
+Question 1 (10 points). Make a lollipop chart of the counts of the top 10 most popular majors at SLU in the past five years, ordering the “lollies” from the most popular major to the 10th most popular major.
+
+```{r}
+df_popular <- df_major %>% filter(!is.na(discipline)) %>% group_by(discipline) %>%
+  summarise(n = n()) %>%
+  mutate(rank = rank(desc(n))) %>%
+  filter(rank <= 10) %>%
+  arrange(rank)
+
+ggplot(data = df_popular, aes(x = n, y = discipline)) +
+  geom_point() +
+  geom_segment(aes(x = 0, xend = n, y = discipline, yend = discipline))
+
+ordered_df <- df_popular %>% ungroup() %>%
+   mutate(dis_ordered = fct_reorder(.f = discipline, .x = n))
+
+ggplot(data = ordered_df, aes(x = n, y = dis_ordered)) +
+  geom_point() +
+  geom_segment(aes(x = 0, xend = n, y = dis_ordered, yend = dis_ordered))
+``` 
+
+Question 2 (10 points). Make the plot from Question 1 of the take-home quiz, but, instead of plotting the other majors of all of the STAT majors in the data set, plot the counts of the minors of all of the STAT majors.
+
+```{r}
+df_new <- df_long %>% filter(type == "minor1"
+                    | type == "minor2" |type == "minor3") %>%
+   filter(discipline != "STAT" & !is.na(discipline))
+
+order <- df_new %>% group_by(discipline) %>%
+  summarise(count = n()) %>%
+  filter(!is.na(discipline)) %>%
+  mutate(count_order = fct_reorder(.f = discipline, .x = count))
+
+ggplot(data = order, aes(x = count_order, y = count)) +
+  geom_col() +
+  coord_flip()
+```
+
+Question 3 (5 points). Push your .Rmd and knitted .html file to GitHub, writing a one sentence commit message for your push.
+
+Extra Credit (1 point). For just a single point of extra credit (the purpose of this is mostly to give anyone who finishes the quiz early something to work on), figure out the “average” number of majors SLU students had over the past 5 years. For example, if the data only had three students: two single majors and one double major, the “average” number of majors would be (1 + 1 + 2) / 4 = 1.33 majors.
