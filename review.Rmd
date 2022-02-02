@@ -1,0 +1,31 @@
+---
+title: "practice_git2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+slumajors_df <- read_csv("~/Downloads/data/SLU_Majors_15_19.csv")
+slumajors_df
+```
+
+4.1 ```mutate()```: Create Variables 
+```{r}
+slumajors_df %>% mutate(ntotal = nfemales + nmales)
+
+## percentage of students identifying as female for each minor
+slumajors_df %>% mutate(percfemale = 100 * nfemales / (nfemales + nmales))
+
+slumajors_df <- slumajors_df %>%
+  mutate(percfemale = 100 * nfemales / (nfemales + nmales))
+
+slumajors_df <- slumajors_df %>% mutate(ntotal = nfemales + nmales)
+
+slumajors_df <- slumajors_df %>%
+  mutate(ntotal = nfemales + nmales) %>%
+  mutate(percfemale = 100 * nfemales / (nfemales + nmales))
+```
