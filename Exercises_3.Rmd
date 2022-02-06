@@ -1,0 +1,69 @@
+---
+title: "Exercises 3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 8.1.2 General Principles
+Read Sections 8.1 through 8.3 of Modern Data Science with R, found here.
+
+__Exercise 1.__ Pick 1 of the 3 examples (stand your ground, climate change, or covid cases), and summarize why that graphic is not ethical. Make sure to include the context that the graph was created in from Section 8.3 in your explanation.
+
+Although all three of these examples are unethical, the one that I found most shocking was the Stand Your Ground Law graphic. In Florida, the "Stand Your Ground" law was passed in 2005. This law upholds that a person is justified in using or threatening to use deadly force if he or she believes it is necessary to do so to prevent his or her own death or bodily harm. At first glance, it appears that murders committed using firearms had decreased in Florida after 2005, the year the law was passed. However, upon further examination, it becomes clear that this graph is twisting the truth. While most graphs are ordered so that the y-axis starts at 0 and increases, the y-axis on this graph starts at 1,000 and decreases down to 0. The actual numbers show that murders increased sharply directly after 2005, rather than decreased. This is very harmful, as it communicates a message that this law is preventing gun violence when really it seemingly perpetuated gun violence. This is additionally harmful because this graph came out 6 months after George Zimmerman was acquitted for killing Trayvon Martin. This graph arguably had the power to affect public perception concerning guns and gun violence, and potentially could have affected public opinion on racial profiling and racial injustice as well. 
+
+Read the short Section 8.5 of Modern Data Science with R, found here, stopping at Section 8.5.1.
+
+__Exercise 2.__ Choose 2 of the 12 principles of ethical practice of data science and come up a (possibly hypothetical) scenario where each of your two chosen principles would come into play.
+
+Two of the twelve principles of ethical practice of data science include, "Protect the privacy and security of individuals represented in our data" and, "Consider carefully the ethical implications of choices we make when using data, and the impacts of our work on individuals and society." One scenario in which one of these two principles would come into play is data mining. Data mining is a very controversial issue. Although some argue data mining has pros, such as producing a better relationship between consumers and producers, data mining ultimately breaches the security and privacy of internet users. The principle of, "Protect the privacy and security of individuals represented in our data" is extremely salient to the issue of data mining. Another scenario in which one of the principles of ethical data science would come into play concerns greenhouse gas emissions. In 2015, it was revealed that more than 11 million Volkswagen vehicles had been using software designed to purposefully under-report greenhouse gas emissions. With the use of sophisticated software, Volkswagen was able to produce data that aligned with the legal regulations for greenhouse gas emissions in the United States. This specific example represents a broad range of unethical scenarios. The manipulation of greenhouse gas emissions or any other such data is highly unethical. Such manipulation impacts society as a whole, as well as the individuals who were led to believe their vehicles were environmentally friendly. Manipulating greenhouse gas emissions data violates the principle, "Consider carefully the ethical implications of choices we make when using data, and the impacts of our work on individuals and society." 
+
+With any data visualization, we need to think critically about what data is actually being visualized as well as the context that the data came from. Consider the following exercise.
+
+__Exercise 3a.__ Find a graphic on the Internet that shows evidence that the Covid vaccine has “worked.”
+
+This graph shows that most of the Covid vaccines are very effective. 
+
+<https://www.statista.com/chart/23510/estimated-effectiveness-of-covid-19-vaccine-candidates/>
+
+__Exercise 3b.__ Find a graphic on the Internet that shows evidence that the Covid vaccine has “not worked.”
+
+This graph claims that people are 2x more likely to die than unvaccinated people. 
+
+<https://twitter.com/HettingClaus/status/1462387732739670018/photo/1>
+
+## 8.2 Sensitive Data Visualizations
+ 
+__Warning:__ The following section deals with sensitive data on lynchings in the United States. If, at any point, working through these examples is detrimental to your mental health, please stop immediately. You may request an alternative assignment with no explanation necessary.
+
+When visualizing sensitive data, we not only need to consider the context that the data came from, but also we need to critically examine the ramifications of producing the graphic. In particular, if our data points are human beings that were killed, tortured, or mistreated, there is danger in “dehumanizing” these people to single data points.
+
+Consider the following two examples, both of which map lynchings in the United States.
+
+__Example 1:__ First, this chloropleth map shows reported lynchings in the southern United States between 1877 and 1950. Take a few moments to zoom in and out of the map to get a sense about how the data is presented.
+
+__Example 2:__ Second, this map shows similar data but the data is presented as individual points instead of on a chloropleth map. Take a few moments to zoom in and out of the map to get a sense about how the data is presented.
+
+__Exercise 1.__ Which of the two visualizations better humanizes the victims of lynching? Why?
+
+The second visualization better humanizes the victims of lynching. In the first visualization, the vast majority of the victims of lynching are only reported as numbers and data points, with a select few specific names and stories. For the most part, however, the only information we are given is the number of lynchings by county. In the second visualization, all of the victims of lynching are represented as people, as each victims name is displayed when you click on any given data point. You are able to see the date as well as other circumstances surrounding the victims death, contextualizing the era in which these people lived. The second graph did a better job of demonstrating that these points on the map represent the deaths of real people. 
+
+__Exercise 2.__ Suppose that you want to humanize the victims more in a static, non-interactive graph. Brainstorm ways that you could achieve this.
+
+* Visualization displaying the victims of lynching by sex and age. For example, it could show that a certain amount of lynching victims were males ages 18-24, and so on and so forth. 
+
+* Pie chart showing the familial/marital status of lynching victims. For example, if 25% were married, 25% of the chart would be colored in a certain color. If 15% of victims had children, then 15% of the graph would be colored a certain color, and so on and so forth. 
+
+* Stacked bar plot that displays how much life victims lived, directly compared to the estimate of how much life they had left to live. If a victim was 26 and the average lifespan at that time was 50, the graph would show that that individual had 24 more years of life left to live. A constraint of this idea is that it could not represent all victims.
+
+* A scatterplot that has the names of victims labelled, but of course this could never represent all the victims and could only represent a certain amount per graph. 
+
+__Exercise 3.__ A deeper discussion of these sites appears in this paper. Read the Introduction section on TayTweets and write 3 major takeaways from this section.
+
+One takeaway from this section is that, since algorithms are human-centered, they are not value neutral. This means that algorithms are not free from wider cultural assumptions, prejudices, or political ideologies found throughout society. This was exemplified through TayTweets, an AI that began to post racist tweets merely 16 hours after joining Twitter. Deep-seated racism in the United States resulted in TayTweets' descent to white supremacy. Another takeaway from this section is that ethical visualization is pertinent to preventing more TayTweets scenarios. It is extremely important that data scientists consider the wider societal implications of their choices, as data visualizations are ultimately algorithmic in nature. Data visualizations have the power to mold viewers understandings, so it is critical that data scientists prevent harm in their visualizations, especially when representing marginalized groups. Lastly, a third takeaway from this section is that visualizations representing the same data can demonstrate a different degree of ethical visualization, as seen by the examples of Lynching by the Equal Justice Initiative and Monroe Work Today by Auut Studio. These two examples ultimately demonstrate that despite our best efforts, visualizations are quite rarely neutral, and should be considered as existing within a wider ideological and political discourse and context. It is of the utmost importance that data scientists employ ethical visualization, and challenge harmful assumptions and narratives within society both in the United States and globally. 
+
+__Exercise 4.__ The authors of the book Data Feminism argue that “leveraging emotion” might help us better communicate with data. Read the first four paragraphs of Chapter 3 of the Data Feminism book. One example the authors use pertains to deaths from gun violence in the United States. Examine this animated chart. Explain how the chart uses emotion to convey the losses due to gun violence better than, for example, a statement that 11,356 people were killed from gun violence in 2018.
+
+This visualization by Periscopic does a much better job of using emotion to convey loss than a statement, and does a better job than the Washington Post graph included within the chapter as well. This is because the Periscopic visualization humanizes the victims of gun violence by providing inherent characteristics of the victims such as age, race and sex, and also provides a description of how they died, as well as how long they could have lived. A desire to live a long life is a shared characteristic of the human experience, and since this graph displays the hundreds of thousands of years lost to gun violence, we are able to empathize to a much deeper extent than we would by simply reading the total number of deaths from gun violence. When clicking on any given line, you are also able to see that many victims were killed by a husband, wife, or friend, further playing on human emotion, and demonstrating how gun violence is a huge problem in the United States. No one hopes to be shot and killed by someone they loved. When we are simply reading a number, we fail to realize that each and everyone of those numbers was a person, with feelings and families just like us. Sometimes simply reading a number allows us to forget our humanity. This Periscopic visualization makes it impossible to see these victims as merely numbers. 
