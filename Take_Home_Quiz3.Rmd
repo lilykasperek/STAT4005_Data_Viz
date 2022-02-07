@@ -1,0 +1,46 @@
+---
+title: "03_quiz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Quiz 3 Take-Home
+Complete this Quiz in a .Rmd file. Submit a .Rmd and a knitted .html file to GitHub by the due date and time.
+
+__Statement of Integrity:__ Copy and paste the following statement and then sign your name (by typing it) on the line below.
+
+“All work presented is my own, and I have followed all rules for collaboration.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may work with other students who are in our class on the take-home quiz, but you must list who you worked with at the top of your quiz. Write the name of any student(s) that you collaborated with in the space below this (ignore this if you did not collaborate with any students).
+
+__Question 1__ (5 points). Consider the Challenger example in our course notes. Clearly, the graphic used to communicate the results is poorly made: it eliminates data points when it really should not. However, the engineers making the graph did not have “malicious intent:” they did not purposefully remove these data points to try to lie: it was a mistake. Is the visualization still unethical? Use principles from the Modern Data Science Readings to explain in a few sentences.
+
+  Although the engineers who made the graph did not purposefully remove the data points to try to lie, the visualization is still unethical. Something I learned here at SLU is very applicable to this situation, and that would be intent vs. impact. Sometimes we have good intentions behind our actions, or simply a lack of mal-intent. However, despite this, the impact of our actions on others can still be negative, which is exactly what happened with this graph. 
+  Furthermore, we can look to several of the twelve principles for the ethical practice of data science to support the assertion that this graph is unethical. One of these principles includes, "Recognize and mitigate bias in ourselves and in the data we use." The engineers arguably should have reflected on their own motivation behind excluding the data. It is important to ask ourselves if we are misinterpreting data due to any bias, such as our tendency to want to be correct. 
+  Another principle is, "Present our work in ways that empower others to make better-informed decisions." This is probably the most relevant principle to the Challenger situation. The researchers who made the graph should have, according to this principle and others, critically examined the impact behind excluding those data points. If the engineers had chosen to present their work with all of the data points, perhaps a better, more informed decision could have been made regarding the launch of the Challenger. 
+  Another relevant principle is, "Consider carefully the ethical implications of choices we make when using data, and the impacts of our work on individuals and society." Although the engineers did not have any bad intentions, it was arguably their responsibility to consider the true consequences of excluding any data points. Considering the gravity of the situation, the engineers should have been as careful as possible and included the data, even if they did not expect the worst, simply due to the ethical implications and potential ramifications. 
+  This aligns with the principle, "Respect and invite fair criticism while promoting the identification and open discussion of errors, risks, and unintended consequences of our work." The researchers, after considering how the presentation of this data could potentially result in mass death and destruction, should have openly invited a discussion surrounding the true trends of the data. Perhaps a conversation around the weather-dependent trend, as well as any unintended consequences of the original work, could have mitigated the Challenger situation. 
+
+__Question 2__ (4 points). Find a graphic online, other than any given in our course readings, that is unethical. Provide a link to your graphic and give a 2-3 sentence description explaining why that graphic is not ethical.
+
+Image: <https://www.datapine.com/blog/wp-content/uploads/2016/08/misleading-statistic-planned-parenthood.jpg>
+Website: <https://www.datapine.com/blog/misleading-statistics-and-data/>
+
+This graph is unethical because it is manipulating the visualization to create a false narrative, specifically one that asserts that Planned Parenthood is becoming an organization that mostly performs abortions, which is obviously very politically charged. The visualization does not have a defined y-axis, making it appear that there were more abortions taking place than cancer screenings at Planned Parenthood in 2013. When situated on the correct y-axis, it becomes clear that although cancer screenings have decreased from 2006 to 2013, there are still substantially more cancer screenings than abortions at Planned Parenthood, and the rate of abortions has actually remained relatively steady over time. 
+
+__Question 3__ (3 points). Explain, in your own words, what each of the following Git terms mean:
+
+commit: Commit allows you to save a file to your local R Project exactly how it is. You can go back to the version you committed, change it, and then commit the new version again. 
+
+push: Push allows you to upload a committed file from RStudio to the GitHub website, allowing for collaboration on the GitHub website. 
+
+pull: Pull is the opposite of push. When you are working on a file on the GitHub website, pull allows you to bring the updated file that was done on the GitHub website to your Rstudio project. 
+
+__Question 4__ (3 points). These three points are given if you successfully committed with a commit message and pushed your .Rmd and .html files to your GitHub account.
+
+
