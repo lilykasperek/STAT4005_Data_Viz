@@ -1,0 +1,52 @@
+---
+title: "04_Take_Home_Quiz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Quiz 4 Take-Home
+Complete this Quiz in a .Rmd file. Submit a .Rmd and a knitted .html file to GitHub by the due date and time.
+
+__Statement of Integrity:__ Copy and paste the following statement and then sign your name (by typing it) on the line below.
+
+“All work presented is my own, and I have followed all rules for collaboration.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may work with other students who are in our class on the take-home quiz, but you must list who you worked with at the top of your quiz. Write the name of any student(s) that you collaborated with in the space below this (ignore this if you did not collaborate with any students).
+
+Use the leaflet package and the us.cities data set from the maps package to make a Zoom-able map of the 50 U.S. capital cities. When you click on a marker for a capital city, both the city name and state as well as the pop (population) should be displayed.
+
+Note that, in the us.cities data set, state capitals are given a value of 2 in the capital variable.
+
+A second note is that if you cannot figure out how to get two “things” (in this case name and population) to display in Leaflet, you would just lose a single point for the quiz (so don’t spend too much time on that part unless you are inclined to do so).
+
+```{r, results = 'hide', message = FALSE, warning = FALSE}
+library(maps)
+library(tidyverse)
+library(leaflet)
+us.cities
+```
+
+```{r}
+capital_cities <- us.cities %>% filter(capital == "2")
+
+content <- capital_cities %>%
+  mutate(popup = paste0('</a>', capital_cities$name, ', population: ',
+                        capital_cities$pop))
+
+capital_map <- leaflet(capital_cities) %>%
+  setView(lng = -98.583, lat = 39.88, zoom = 4) %>%
+  addTiles() %>%
+  addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
+  addMarkers(lng = capital_cities$long, lat = capital_cities$lat,
+             clusterOptions = markerClusterOptions(),
+             popup = content$popup)
+
+capital_map
+```
+
+
