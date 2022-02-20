@@ -1,0 +1,25 @@
+---
+title: "9.1_Exercises"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 9.1 What is ```shiny```?
+
+__Exercise 1.__ What makes the app given in the first tab interactive? In other words, what is a user allowed to change in the app?
+
+The user is allowed to change n (the sample size), the intercept, the slope, and the standard deviation of residuals on the app, which is what makes the app interactive. 
+
+__Exercise 2.__ What are the outputs of the app? Are the outputs graphs, tables, or both?
+
+The outputs of the app are both graphs and tables. The regression results tab outputs a graph of the OLS Line of Best Fit, as well as a table with parameters, beta coefficients, standard errors, t values, p values, and R squared. The sources of variation tab outputs individual graphs showing the total, residual, and regression variation, as well as a table of other summary statistics.
+
+Now, examine one of the apps at this r studio shiny gallery.
+
+__Exercise 3.__ Write a short one paragraph description about the app you selected, including what the app allows the user to change, what the output is, and one interesting thing you found in the app.
+
+I selected an app from the government/public sector section of the RStudio shiny gallery. The specific app I chose visualizes the freedom of press index for a majority of the countries across the world. To navigate the app, the user can either scroll or select the title of the tab the user wants to view. The app includes a home page, an interactive map, an interactive graph, and a tab with links to the code and the API. The interactive map tab allows the user to change year, rank, and score and allows the user to hover over countries to view the specific rank or score for a given country for the selected year. The output is a map. When changing the year, the color of the map changes as well. A lower rank and score correspond to darker colors, meaning the freedom of press index is better in countries that appear darker on the map. The output is slightly different when changing the rank and score. The output is still a map, but the names of the countries that match the exact rank or score selected, or are roughly 5 points above or below that rank or score, will be displayed and the country itself will be highlighted in yellow. The interactive graph is very similar to the map. The user can change the countries by searching them in a search bar and can change the metric from rank to score. The user is allowed to compare as many countries as they would like. It is indicated on the graph that a lower score is better as well. The output when searching for different countries is a line graph that compares the countries throughout time, allowing the user to hover over points on the line that display the individual ranks or scores for different countries. When selecting a metric, the line graph visualizes the data for the selected metric. One thing that I found interesting in the app is that both the rank and score for the freedom of press index in the United States has increased from 2002 to 2019. 
+
