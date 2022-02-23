@@ -1,0 +1,69 @@
+---
+title: "05_In_Class_Quiz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+__Statement of Integrity:__ Copy and paste the following statement and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this quiz.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may not communicate with or work with anyone else on this quiz, but you may use any of our course materials or materials on the Internet.
+
+__Question 1 (7 points).__ Consider the following two bar plots using the palmerpenguins data set. The first is a plot of the penguin species while the second is a plot of the average bill length for each species.
+
+```{r}
+library(palmerpenguins)
+library(tidyverse)
+ggplot(data = penguins, aes(x = species)) +
+  geom_bar() +
+  labs(y = "Count")
+
+ggplot(data = penguins %>% group_by(species) %>%
+         summarise(avg_length = mean(bill_length_mm, na.rm = TRUE)),
+       aes(x = species, y = avg_length)) +
+  geom_col() +
+  labs(y = "Average Bill Length")
+```
+
+Which of the two graphs is appropriate to construct? Give a one sentence reason.
+
+Out of the two graphs, the first is appropriate to construct because it is displaying the counts of categorical data. 
+
+__Question 2 (9 points).__ Use the Happy Planet Index data set to construct a graph that does not properly show variability in the underlying data. Recall that some variables in this data set are LifeExpectancy, Wellbeing, Footprint, and Region of the world.
+
+```{r}
+library(tidyverse)
+hpi_df <- read_csv("~/Desktop/data/hpi-tidy.csv")
+
+hpi_avg <- hpi_df %>% mutate(Region = fct_reorder(.f = Region, .x = Footprint)) %>%
+  filter(!is.na(Footprint)) %>% 
+  group_by(Region) %>%
+  summarise(avg = mean(Footprint))
+
+ggplot(data = hpi_avg, aes(x = Region, y = avg)) +
+  geom_col() +
+  coord_flip() +
+  labs(y = "Average Footprint")
+```
+
+Question 3 (7 points). Fix your graph from the previous question so that it does properly show variability in the underlying data.
+
+```{r}
+hpi_fix <- hpi_df %>% mutate(Region = fct_reorder(.f = Region, .x = Footprint)) %>%
+  filter(!is.na(Footprint))
+
+ggplot(data = hpi_fix, aes(x = Region, y = Footprint)) +
+  geom_point(alpha = 0.4) +
+  geom_point(data = hpi_avg, aes(y = avg, colour = "Mean Footprint")) +
+  coord_flip() +
+   scale_colour_manual(values = c("Mean Footprint" = "red")) +
+  labs(colour = " ")
+```
+
+The remaining 2 points are given for committing and pushing your .Rmd and .html files correctly to GitHub.
