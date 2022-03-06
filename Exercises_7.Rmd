@@ -1,0 +1,94 @@
+---
+title: "Exercises_7"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 10.1 Basic Reactivity
+
+Read Sections 3.1 through 3.3 in the Basic Reactivity Chapter of Mastering Shiny
+
+__Exercise 1.__ 3.3.6 Exercise 1 in Mastering Shiny.
+
+Given this UI: Fix the simple errors found in each of the three server functions below. First try spotting the problem just by reading the code; then run the code to make sure you’ve fixed it.
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  textInput("name", "What's your name?"),
+  textOutput("greeting")
+)
+
+server1 <- function(input, output, server) {
+  output$greeting <- renderText(paste0("Hello ", input$name))
+}
+
+shinyApp(ui, server1)
+
+## The problem with server1 was that it had input instead of output before renderText, and it just had name instead of input$name in the parantheses. 
+
+ui <- fluidPage(
+  textInput("name", "What's your name?"),
+  textOutput("greeting")
+)
+
+server2 <- function(input, output, server) {
+  greeting <- reactive(paste0("Hello ", input$name))
+  output$greeting <- renderText(greeting())
+}
+
+shinyApp(ui, server2)
+
+## The problem with server2 was that it was not wrapped inside a reactive expression. 
+
+ui <- fluidPage(
+  textInput("name", "What's your name?"),
+  textOutput("greeting")
+)
+
+server3 <- function(input, output, server) {
+  output$greeting <- renderText({
+    paste0("Hello ", input$name)
+})
+}
+
+shinyApp(ui, server3)
+
+## The problem with server3 was that greeting was misspelled in the output, Hello needs a space after it, and there was no reactive renderText output. 
+```
+
+__Exercise 2.__ 3.3.6 Exercise 2 in Mastering Shiny.
+
+```{r}
+## Draw the reactive graph for the following server functions:
+
+server1 <- function(input, output, session) {
+  c <- reactive(input$a + input$b)
+  e <- reactive(c() + input$d)
+  output$f <- renderText(e())
+}
+
+## Inputs a and b connect to reactive c. Reactive c connects to reactive e. Input d connects to reactive e. Reactive e connects to output f. 
+
+server2 <- function(input, output, session) {
+  x <- reactive(input$x1 + input$x2 + input$x3)
+  y <- reactive(input$y1 + input$y2)
+  output$z <- renderText(x() / y())
+}
+
+## Inputs x1, x2, and x3 connect to reactive x. Reactive x connects to output z. Inputs y1 and y2 connect to reactive y. Reactive y connects to output z. 
+
+server3 <- function(input, output, session) {
+  d <- reactive(c() ^ input$d)
+  a <- reactive(input$a * 10)
+  c <- reactive(b() / input$c) 
+  b <- reactive(a() + input$b)
+}
+
+## Input d connects to output d. Input a connects to reactive a, which connects to reactive b, which connects to reactive c, which connects to output d. Input c connects to reactive c, which connects to output d. Input b connects to reactive b, which connects to reactive c, which connects to output d. 
+```
