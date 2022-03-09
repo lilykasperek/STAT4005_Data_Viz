@@ -1,0 +1,454 @@
+---
+title: "Midterm_In_Class"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Midterm In Class
+
+Complete this exam in a .Rmd file. To turn in the exam, push both a .Rmd file and a knitted .html file to your GitHub site.
+
+Statement of Integrity: Copy and paste the following statement and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this exam.”
+
+Lily Kasperek 
+
+Collaboration Reminder: You may not communicate with or work with anyone else on this exam, but you may use any of our course materials or materials on the Internet.
+
+Question 1 (20 points). Examine the following plot that uses the pokemon_full.csv data set. The plot gives the count of each Pokemon type.
+
+```{r}
+library(tidyverse)
+library(here)
+pokemon_df <- read_csv(here("data/pokemon_full.csv"))
+pokemon_type <- pokemon_df %>% group_by(Type) %>% summarise(type_count = n())
+
+ggplot(data = pokemon_type, aes(x = Type, y = type_count)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Type",
+       y = "Count") +
+  coord_flip()
+```
+
+part a. Which of the 7 grammar of graphics parameters are explicitly specified in the code to make the plot?
+
+The data argument, mapping argument, geom_function, stat argument, and coordinate function are explicitly specified in the code to make the plot.  
+
+part b. For these types of plots, we have usually reordered the Type so that the type with the most Pokemon would be first and the type with the least number of pokemon would be last. Use a principle from the Data Visualization Reading to explain why we would want to do this.
+
+We would want to do this based on the human nature of perception. When the bars are not ordered in this way, the pattern of the data is not easily distinguishable. We do our best judgments when judging the relative position of objects on a common scale, which applies when we compare the heights of bars on bar plots. 
+
+part c. We have also stated that, for bar plots and lollipop plots, 0 should be included in the plot. On the other hand, for point plots and scatterplots, 0 need not be included. Using a principle from the Data Visualization Reading, explain why it is okay to omit 0 from a point plot but not from a bar plot.
+
+It is okay to omit 0 from a point plot but not a bar plot because bar plots encode their variable as lengths, and it may be misleading if the 0 is ommitted in this case. As for a point plot, the range should be confined to the range of values in the data.  
+
+Question 2 (5 points). These points will be given for properly committing and pushing a .Rmd and a .html file with your exam answers.
+
+Question 3 (5 points). Tell me something you learned about ethics in data visualization.
+
+Something I learned about ethics in data visualization is that the ethics for data science are inspired by the Hippocratic Oath. 
+
+Question 4 (20 points).
+
+part a. A data set on United States election results was obtained from https://github.com/kjhealy/us_elections_2020_csv. Use the maps package, as well as this data set (posted on Sakai), to construct a map that fills each U.S. State with the percent of voters who voted for the republican candidate, Trump (percent_gop). For this problem,
+
+you do not need to worry about including Alaska or Hawaii. They are important but this is a timed exam!
+you should change the colour scale so that it is appropriate for the problem.
+
+```{R}
+library(maps)
+library(tidyverse)
+library(here)
+election_df <- read_csv(here("data/2020_county_pres.csv")) %>%
+  group_by(state_name) %>%
+  summarise(total_gop = sum(votes_gop),
+            total_dem = sum(votes_dem)) %>%
+  mutate(percent_gop = 100 * total_gop / (total_gop + total_dem)) %>%
+  mutate(state_name = str_to_lower(state_name))
+
+
+election_df
+state_df <- ggplot2::map_data("state")
+
+ggplot(data = state_df, aes(x = long, y = lat, group = group)) +
+  geom_polygon(colour = "black") +
+  theme_void()
+
+state_full <- left_join(election_df, state_df, by = c("state_name" = "region"))
+
+ggplot(data = state_full, aes(x = long, y = lat, group = group)) +
+  geom_polygon(colour = "black", aes(fill = percent_gop)) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_void() +
+  scale_fill_viridis_b(n.breaks = 7)
+```
+
+part b. Explain why the data frame R needs to construct a map of the United States is much, much longer than 50 rows.
+
+The data frame R needs to construct a map of the United States is much, much longer than 50 rows because it contains all of the necessary information to draw the shapes of each state. The boundary lines for every state are complex, and thus each state has many, many longitude and latitude coordinates to construct it. It would not make sense if each state only had one longitude and latitude coordinate. 
+
+Question 5 (25 points). Construct a shiny app using the alcohol.csv data set that has a scatterplot of the number of wine servings vs. the number of beer servings. In the app, the user should be able to select a country and have a label for that country appear on the app.
+
+In addition, create an input that lets the user choose a variable (either beer_servings, spirit_servings, and wine_servings) and create an output that is a histogram based on that variable.
+
+So you can focus your time on shiny as much as possible, a static graph or wine servings vs. beer servings, with Australia labeled, is given below (you may copy this code to use in your app if you would like).
+
+You must complete this task using shiny (even though you could do something similar using plotly).
+
+```{r}
+library(shiny)
+library(tidyverse)
+library(ggrepel)
+library(here)
+alcohol_df <- read_csv(here("data/data/alcohol.csv"))
+
+onecountry_df <- alcohol_df %>% filter(country == "Australia")
+
+ggplot(alcohol_df, aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df, aes(label = country)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+
+library(shiny)
+
+library(shiny)
+
+ui <- fluidPage(
+   sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseCountry",
+                label = "Choose a Country",
+                choices = levels(factor(alcohol_df$country)))),
+    mainPanel(plotOutput("servingsgraph"))
+    )
+)
+
+server <- function(input, output, session) {
+  onecountry_df <- alcohol_df %>% filter(country == "Australia")
+
+serv_plot <- ggplot(alcohol_df, aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df, aes(label = country)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+
+output$servingsgraph <- renderPlot({
+  serv_plot
+})
+}
+
+shinyApp(ui, server)
+
+ui <- fluidPage(
+    sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseCountry",
+                label = "Choose a Country",
+                choices = levels(factor(alcohol_df$country)))),
+    mainPanel(plotOutput("servingsgraph"))
+    )
+)
+
+server <- function(input, output, session) {
+  onecountry_df <- reactive({
+    alcohol_df %>% filter(country == "Australia")
+  })
+
+serv_plot <- reactive({
+  ggplot(alcohol_df, aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df, aes(label = country)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+})
+
+output$servingsgraph <- renderPlot({
+  serv_plot()
+})
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+library(shiny)
+var_choices <- names(alcohol_df)[2:4]
+ui <- fluidPage(
+    sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseCountry",
+                label = "Choose a Country",
+                choices = levels(factor(alcohol_df$country)),
+                 radioButtons("varchoice", label = "Choose a Variable", 
+                             choices = var_choices))),
+    mainPanel(plotOutput("servingsgraph"))
+    )
+)
+
+server <- function(input, output, session) {
+  onecountry_df <- reactive({
+    alcohol_df %>% filter(country == input$chooseCountry) 
+  })
+  
+  serv_plot <- reactive({
+    ggplot(alcohol_df(), aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df(), aes(label = country)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+  })
+  
+  output$servingsgraph <- renderPlot({
+    serv_plot()
+  })
+  
+  hist_plot <- reactive({
+    ggplot(data = alcohol_df, aes(x = .data[[input$varchoice]])) +
+      geom_histogram()
+    
+  })
+  output$histograph <- renderPlot({
+    hist_plot()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+    sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseCountry",
+                label = "Choose a Country",
+                choices = factor(alcohol_df$country))),
+    mainPanel(plotOutput("servingsgraph"))
+    )
+)
+
+server <- function(input, output, session) {
+  onecountry_df <- reactive({
+    alcohol_df %>% filter(country == input$chooseCountry)
+  }) 
+  
+  serv_plot <- reactive({
+    ggplot(alcohol_df, aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df, aes(label = country)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+  })
+  
+  output$servingsgraph <- renderPlot({
+    serv_plot()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+var_choices <- names(alcohol_df)[2:4]
+library(shiny)
+
+ui <- fluidPage(
+    sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseCountry",
+                label = "Choose a Country",
+                choices = factor(alcohol_df$country),
+                radioButtons("varchoice", label = "Choose a Variable", 
+                             choices = var_choices))),
+    mainPanel(plotOutput("servingsgraph"),
+              plotOutput("histograph"))
+    )
+)
+
+server <- function(input, output, session) {
+  onecountry_df <- reactive({
+    alcohol_df %>% filter(country == input$chooseCountry)
+  }) 
+  
+  serv_plot <- reactive({
+    ggplot(alcohol_df, aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df, aes(label = input)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+  })
+  
+  output$servingsgraph <- renderPlot({
+    serv_plot()
+  })
+
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+   sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseC",
+                label = "Choose a Country",
+                choices = factor(alcohol_df$country),
+                radioButtons("varchoice", label = "Choose a Variable",
+                             choices = ))),
+    mainPanel(plotOutput("servingsgraph"))
+))
+
+server <- function(input, output, session) {
+  onecountry_df <- reactive({
+    alcohol_df %>% filter(country == input$chooseC)
+})
+  
+  servings <- reactive({
+    ggplot(alcohol_df, aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+  geom_label_repel(data = onecountry_df(), aes(label = )) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+  })
+  
+  output$servingsgraph <- renderPlot({
+    servings()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+   sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseCountry",
+                label = "Choose a Country",
+                choices = factor(alcohol_df$country))),
+    mainPanel(plotOutput("servingsgraph"))
+))
+
+server <- function(input, output, session) {
+  
+  onecountry_df <- reactive({
+    alcohol_df %>% filter(country == input$chooseCountry)
+  })
+
+  servings <- reactive({
+    ggplot(alcohol_df(), aes(x = beer_servings, y = wine_servings)) +
+  geom_point() +
+      geom_label_repel(onecountry_df(), aes(label = country)) +
+  geom_point(data = onecountry_df, size = 3, shape = 1)
+    
+  })
+  
+  output$servingsgraph <- renderPlot({
+    servings()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+Question 6 (10 points). For the following shiny app, draw a reactive graph. I think the easiest way to do this would be to hand-draw the graph and hand it in on a piece of paper (there is paper at the front of the room). If you can figure out a way to draw it on your computer, you may do that and push that file to GitHub.
+
+```{r}
+ui <- fluidPage(
+  radioButtons("input1"),
+  selectInput("input2"),
+  numericInput("input3"),
+  plotOutput("output1"),
+  tableOutput("output2")
+)
+
+server <- function(input, output, session) {
+  
+  df <- tibble(xvar = c(1, 2, 3), yvar = c("a", "b", "c"))
+  
+  newval <- reactive({
+    input$input1 - input$input2
+  })
+  
+  anotherval <- reactive({
+    log(input$input1)
+  })
+  
+  output$output1 <- renderPlot({
+    plot(newval())
+  })
+  
+  output$output2 <- renderTable({
+    table(df[[input$input3]])
+  })
+}
+
+shinyApp(ui, server)
+```
+
+Question 7 (20 points). Consider again the women’s tennis data set, wta_matches_2019.csv, where each row corresponds to a match played on the WTA (Women’s Tennis Association) tour. Important variables to consider for this problem include:
+
+winner_name, the name of the player who won the match
+loser_name, the name of the player who lost the match
+
+Construct a lollipop chart that shows the 10 WTA tennis players with the highest average number of aces in the 2019 season who have played at least 20 matches.
+
+Some Hints:
+
+if you can’t complete the task, make a lollipop chart of something to earn some partial credit.
+variables that you will need are winner_name, loser_name, w_ace, and l_ace.
+
+we haven’t done much in tidyr in class so I’ve already pivoted the data set for you (see code below).
+you will need to create a new variable called aces that is the w_ace if the player won (so if won_or_lost is winner_name) and l_ace if the player lost.
+
+recall that, if there are missing values, you will need to remove them when finding the mean aces for a player. You can do this with the na.rm = TRUE argument to your summarise() function. 
+
+See https://highamm.github.io/datascience234/dplyr.html#removing-missing-values for a quick review of this.
+you will also need to count up the matches for each player and use a filtering join to only keep players who have played 20 or matches. As I’m writing this, I am realizing we did not do a ton with joins….so here is some code that may be helpful: 
+
+```{r}
+library(tidyverse)
+library(here)
+wta_df <- read_csv(here("data/wta_matches_2019.csv"))
+wta_long <- wta_df %>% pivot_longer(c(winner_name, loser_name),
+                                    names_to = "won_or_lost",
+                                    values_to = "player") %>%
+  select(won_or_lost, player, everything())
+
+mean <- wta_test %>% group_by(player) %>%
+  summarise(mean_ace = mean(total_ace)) %>%
+  mutate(rank = rank(desc(mean_ace))) %>%
+  filter(rank <= 20) %>%
+  mutate(player = fct_reorder(player, mean_ace))
+
+ggplot(data = mean, aes(x= player, y= mean_ace)) +
+  geom_segment(aes(x=player, xend = player, y = 0, yend = mean_ace)) +
+  geom_point(size=5, color="red", fill=alpha("orange", 0.3), alpha=0.7, shape=21, stroke=2) +
+  coord_flip() 
+```
+
+Question 8 (20 points).
+
+part a. Consider the lollipop plot you made in Question 7. Why is this plot not the best plot to make to look at the top women’s servers in 2019? (There might be a couple of reasons but you should reference one that we have explicitly talked about in class a lot).
+
+The main problem is that the lollipop graph does not adequately express variability, and thus obstructs a lot of the underlying data. The mean aces of the players are not truly representative of their performance. This is one of the main problems with constructing bar plots as well. 
+
+part b. Fix the plot so that it no longer has the issue you described in Question 8a. If you could not make the plot in Question 7, use this much simpler data set to plot the mean of yvar for each group and then fix the issue.
+
+```{r}
+library(tibble)
+set.seed(03092022)
+toy_df <- tibble(group = c("a", "a", "a", "b", "b", "b", "c", "c",
+                           "c", "c", "d", "d"),
+       response = rnorm(12, 4, 3))
+
+toy_avg <- toy_df %>% group_by(group) %>%
+  summarise(avg = mean(response))
+
+ggplot(data = toy_avg, aes(x = group, y = avg)) +
+  geom_col()
+
+ggplot(data = toy_df, aes(x = group, y = response)) +
+  geom_point() +
+  geom_point(data = toy_avg, aes(y = avg, colour = "Mean")) +
+  coord_flip() +
+  scale_colour_manual(values = c("Mean" = "red"))
+```
+
