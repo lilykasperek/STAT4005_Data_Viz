@@ -1,0 +1,118 @@
+---
+title: "Midterm_Mini_Tutorial_2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Midterm Take Home
+
+Complete this exam in a .Rmd file. To turn in the exam, push 4 .Rmd files and 4 knitted .html files to your GitHub repository.
+
+__Statement of Integrity:__ Copy and paste the following statement into your first .Rmd file and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this exam.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may not communicate with or work with anyone else on this exam, but you may use any of our course materials or materials on the Internet.
+
+__Mini-Tutorial 2:__ Mapping (15 points)
+
+__Topics to Cover:__
+
+Either mapping with the maps package OR mapping from a shapefile.
+Make sure to include:
+
+(4 points) An introductory statement with the goal of the section (in your own words) and a brief description of the data set and variables you will be using.
+
+(11 points) R code chunks interspersed with some text descriptions about the code you have written and with text description about each topic. If you are using the maps package, you should use a map other than the U.S. States Map or World Map that we used in class.
+
+## Mapping, Leaflet, and Shapefiles
+
+The purpose of this section is to provide a demonstration of how to create maps, and map different variables using ```ggplot2```. To provide a mapping tutorial, we will first use the ```county``` data set built into R. Variables of interest from this data set include longitude, latitude, and group, as these are the basic aesthetics necessary to create a map, as well as county. We will also use the ```county.fips``` data set from the maps package. Variables of interest from this data set include county FIPs, which refer to Federal Information Processing Standards codes. We will also create an interactive graph using Leaflet, as well as a map that is not built into R by using a shapefile. 
+
+The first step is loading the tidyverse and the maps package. After that, we create a data set titled, ```county_df``` that uses the map_data() function to provide a data frame with all the necessary information to plot all of the counties in the United States. 
+
+```{r}
+library(tidyverse)
+library(maps)
+county_df <- ggplot2::map_data("county")
+```
+
+The next step is to create a basic map using ```county_df```. To create a map, we will use our data set in the data argument, and use the longitude, latitude, and group from that data set in the mapping argument. We then use ```geom_polygon``` to render a map of the United States, with the boundaries of each county from every state defined. We can make these boundaries more clearly defined by adding ```colour = "black"``` in our geom. This colors the boundary lines black. We can also add ```theme_void()``` so that the background of the plot, the latitude on the y axis and longitude on the x axis, as well as the axis grid, disappear. 
+
+```{r}
+ggplot(data = county_df, aes(x = long, y = lat, group = group)) +
+  geom_polygon(colour = "black") +
+  theme_void()
+```
+
+Clearly, this map is quite overwhelming. Because of this, we will make a map of one state, New York, before we map any variables. To do this, we have to create a new data set that only contains the mapping characteristics of NY by using filter. The new data set is called ```county_ny```. 
+
+```{r}
+county_ny <- county_df %>% filter(region == "new york")
+
+ggplot(data = county_ny, aes(x = long, y = lat, group = group)) +
+  geom_polygon(colour = "black") +
+  theme_void()
+```
+
+Examining the counties of New York alone is much more visually pleasing and less overwhelming. Now that we have this map, we can map a variable. To do this, we should load library(maps) and the county.fips data set, which contains all of the FIPS, or Federal Information Processing Standards codes for each county in the United States. However, since we are only interested in NY, we will filter this data set so that we only have the FIPS of counties in NY. Something important to note is that we must use ```separate``` when creating our new data set, so that the ```countyfipsny``` data set has matching keys in the ```county_ny``` data set. After that, we have to make another new data set, in which we join our ```countyfipsny``` data set with the ```countyny``` data set, which again, contains the mapping information. We do that by using ```left_join()``` and joining by county name. After that, we can make our graph using the merged data set. Within our geom, we must add ```aes(fill = fips))``` so that the graph is colored by the FIP codes, as well as use ```scale_fill_viridis_b``` since FIP is a numeric variable. 
+
+```{r}
+library(maps)
+county.fips 
+
+countyfipsny <- county.fips %>% separate(col = polyname, into = c("state", "name"),
+                         sep = ",") %>%
+  filter(state == "new york")
+
+countyfullny <- left_join(county_ny, countyfipsny, by = c("subregion" = "name"))
+
+ggplot(data = countyfullny, aes(x = long, y = lat, group = group)) +
+  geom_polygon(colour = "black", aes(fill = fips)) +
+  theme_void() +
+  scale_fill_viridis_c()
+```
+
+## Leaflet
+
+Now that we have learned to create a static map, we can use the Leaflet package to make an interactive map! First, we have to load in the data set. The next step is to create a content data set, which creates a popup variable that contains the names of each county and that county's FIP. This variable is what makes the graph interactive. After that, we create a map using leaflet. We input longitude and latitude values that correspond to how the map will appear when we first run it. We can also set how zoomed in we want the map to be when we first open it as well. We can also customize the map in the addProviersTiles section. We must also input the longitude and latitude from the data set we are mapping, as well as set the cluster options which affect our markers, and add our popup variable. Then, the interactive map is ready to go!
+
+```{r}
+ library(leaflet)
+
+ content <- countyfullny %>%
+   mutate(popup = paste0('<a href =', countyfullny$subregion, '>',
+                         countyfullny$fips, '</a>'))
+ 
+ fip_map <- leaflet(countyfullny) %>%
+   setView(lng = -98.583, lat = 39.88, zoom = 4) %>%
+   addTiles() %>%
+   addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
+   addMarkers(lng = countyfullny$long, lat = countyfullny$lat,
+              clusterOptions = markerClusterOptions(),
+              popup = content$popup)
+ fip_map
+```
+
+It is interesting to see how the FIPS appear on the map, as many different FIPS can be seen very close to each other in certain areas depending on where the county boundaries are. In the same breath, however, many of the same FIPS are clustered together as a result of the nature of the data. 
+
+## Shapefiles 
+
+We can also map other areas that are not built into R by using shapefiles from the internet. Below we will construct a graph of combined New England city and town areas. To do this, we must load in ```library(sf)``` and create our data set by reading in the shapefile. We must then create a coordinate reference system to change the coordinates so that they are longitudes and latitudes. Next, we can use that data set to make our map using ```geom_sf```. 
+
+```{r}
+library(sf)
+shp <- read_sf("data/cb_2018_us_necta_500k/cb_2018_us_necta_500k.shp") %>%
+  st_transform(st_crs("+proj=longlat"))
+
+ggplot(data = shp) +
+  geom_sf() +
+  theme_void()
+```
+
+NOTE: I wanted to use the countypov data set to map poverty but it would not work because there were no matching keys in the data sets. In countypov, the county name was written like this, "Autauga County" whereas in county the county name was written like this, "autauga." I tried to separate the name of the county and the word county and then merge, but it still would not work. I am sure there is a remedy to this but I could only figure out the FIPS considering how much time I had. 

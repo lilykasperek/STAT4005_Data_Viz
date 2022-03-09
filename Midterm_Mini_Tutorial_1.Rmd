@@ -1,0 +1,227 @@
+---
+title: "Midterm_Mini_Tutorial_1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Midterm Take Home
+
+Complete this exam in a .Rmd file. To turn in the exam, push 4 .Rmd files and 4 knitted .html files to your GitHub repository.
+
+__Statement of Integrity:__ Copy and paste the following statement into your first .Rmd file and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this exam.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may not communicate with or work with anyone else on this exam, but you may use any of our course materials or materials on the Internet.
+
+__Mini-Tutorial 1:__ Data Visualization Concepts (20 points)
+
+__Topics to Cover:__
+
+1. Grammar of Graphics.
+
+2. One topic from the Data Visualization Reading of your choice.
+
+3. A second topic from the Data Visualization Reading of your choice.
+
+Make sure to include:
+
+* (4 points) An introductory statement with the goal of the section (in your own words) and a brief description of the data set and variables you will be using.
+
+* (16 points) R code chunks interspersed with some text descriptions about the code you have written and with text description about each topic. All three topics should have some R code. The data you use can be real data or it can be “toy” data (generated from tibble()).
+
+* you do not need to cover everything in these topics: aim for writing something that someone would be able to read through in ~ 10 minutes.
+
+## Grammar of Graphics 
+
+The purpose of this section is to provide an in-depth examination into all seven structural components of data visualizations when using ```ggplot2``` in RStudio. Additionally, different plot themes will be explored as well. To complete these goals, the ```pokemon_full``` data set will be used. This data set includes various characteristics of hundreds of different Pokemon, all of which are classified by their Type. Some variables of interest include ```Type```, which classifies what kind of Pokemon each Pokemon is, ```Defense```, the stat that indicates how much damage a Pokemon can do, ```Speed```, the stat that indicates what turn a Pokemon will take in battle, and ```Legendary```, which indicates whether a Pokemon is Legendary or not, which means it is very rare.
+
+__DATA:__ The data argument is probably the easiest argument to understand. The data argument simply refers to the data set being used. 
+
+```{r}
+library(tidyverse)
+pokemon_full <- read_csv("data/pokemon_full.csv")
+pokemon_full
+```
+
+In this case, the data set being used is ```pokemon_full```. So our data argument would look like this within ```ggplot2```:
+
+```ggplot(data = pokemon_full)```
+
+__MAPPING:__ Without the mapping argument, or geom_function for that matter, the data argument is pretty much useless. The mapping argument designates the aesthetics that will be graphed onto our plot. Aesthetics include ```x``` and ```y ```, which come from the data set specified in the data argument, as well as ```colour```, ```shape```, and ```fill```, among several others. If we wanted to make a plot of the relationship between ```Type``` and ```Defense``` using the ```pokemon_full``` data set, our mapping argument would look like this:
+
+```ggplot(data = pokemon_full, aes(x = Type, y = Defense))```
+
+As we can see, the mapping argument is specified by using: ```aes()```
+
+__GEOM_FUNCTION:__ Now that the data and mapping arguments have been covered, we can turn to ```geom_function```, which ties everything together and allows us to produce a simple data visualization. The ```geom_function``` refers to the specified geometric shape that displays the data. Since we are examining the relationship between a categorical and quantitative variable, we can use ```geom_boxplot```
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Type, y = Defense)) +
+  geom_boxplot()
+```
+
+```geom_boxplot``` and ```geom_violin``` are frequently used to represent the relationship between a quantitative and categorical variable, as showed above. However, different ```geoms``` are used in different situations. For example, ```geom_histogram`` can be used to examine a single quantitative variable, as we will see below. 
+
+Now that we understand ```data```, ```mapping```, and ```geom_function``` we can turn to the other structural components of data visualization in ```ggplot2```
+
+__FACET_FUNCTION__: The ```facet``` function is useful when creating subplots for data, and is most often used with ```facet_wrap()``` which we will see below. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Speed)) +
+  geom_histogram(colour = "black", fill = "white", bins = 15) +
+  facet_wrap(~Type)
+```
+
+To use facet_wrap() a categorical variable must be specified within the parentheses, as we can see above. The plot we made with facet_wrap() displays the ```Speed``` of different Pokemon by ```Type```. Below, we will compare the ```Speed``` and ```Defense``` of different Pokemon by ```Type``` by using a scatter plot with a smoother. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Speed, y = Defense)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~Type)
+```
+
+__STAT__: Each ```geom``` in ```ggplot2``` has a statistical transformation, specified in the geom by using stat. If this is left unspecified, ```ggplot2``` will use the default statistical transformation. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Type)) +
+  geom_bar(stat = "count")
+```
+
+The default statistical transformation for ```geom_bar``` is ```stat = "count"```, which provides a count of the observations of the variable of interest. If we wanted to see a situation in which we would need to change the default statistical transformation, we would first make a data set in which ```Type``` is already counted, and then insert a new ```y``` variable in the mapping argument. The process would look something like this:
+
+```{r}
+pokemon_count <- pokemon_full %>% group_by(Type) %>%
+  summarise(n = n())
+
+ggplot(data = pokemon_count, aes(x = Type)) +
+  geom_bar(stat = "count")
+
+ggplot(data = pokemon_count, aes(x = Type, y = n)) +
+  geom_bar(stat = "identity")
+```
+
+Since ```Type``` was already counted in the new data set, it would not make sense to rely on the default, and thus we changed stat to ```stat = "identity"```. 
+
+__POSITION__: The ```position``` argument is most often changed to create a side-by-side bar plot from a stacked bar plot. The default ```position``` for a stacked bar plot is ```position = "stack"```
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Type, fill = Legendary)) +
+  geom_bar(position = "stack") +
+  scale_fill_viridis_d()
+```
+
+To create a side-by-side bar plot, we would change the position argument to be ```position = "dodge```
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Type, fill = Legendary)) +
+  geom_bar(position = "dodge") +
+  scale_fill_viridis_d()
+```
+
+As we can see from both plots, there is a significant amount of observations in which ```Legendary = FALSE```. For some of the types, there are no observations of ```Legendary = TRUE```, which affects how the side-by-side bar plot looks. Nonetheless, this example provides an adequate tutorial for ```position```.  
+
+__COORDINATE_FUNCTION__: As we have seen in the examples above, plots are constructed using a Cartesian coordinate function unless otherwise specified. One example of a coordinate function other than the standard Cartesian plot is ```coord_polar``` which is used below. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Type)) +
+  geom_bar() +
+  coord_polar()
+```
+
+Although this option is available, it may not be very useful. ```coord_flip``` is utilized much more often, and flips the x and y variables on a Cartesian plot. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Type)) +
+  geom_bar() 
+
+ggplot(data = pokemon_full, aes(x = Type)) +
+  geom_bar() +
+  coord_flip()
+```
+
+__Plot Themes__: The ```theme()``` function allows you to customize plots in ```ggplot2```. There is an abundance of options. In the plot below, the background color of the plot, the length of the axis ticks, and the color and size of a panel grid are customized using ```theme()```. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = Speed, y = Defense, colour = Type)) +
+  geom_point()
+
+ggplot(data = pokemon_full, aes(x = Speed, y = Defense, colour = Type)) +
+  geom_point() +
+  theme(plot.background = element_rect(fill = "pink"),
+        axis.ticks.length = unit(0.5, "cm"), 
+        panel.grid.major = element_line(colour = "black", size = 0.5))
+```
+
+However, this is just the tip of the iceberg of plot characteristics that can be changed with ```theme()```
+
+## Data Visualization Reading #1
+
+The purpose of this section is to elucidate what the author meant when she stated, "relative comparisons need a stable baseline." To do so, I will use a modified version of the ```standings``` data set. Some variables of interest include ```win``` and ```team```. 
+
+```{r}
+library(tidyverse)
+standings <- read_csv("data/data/standings.csv")
+standings_small <- standings %>% filter(year <= 2005 | year >= 2010) %>%
+  filter(team == "Buffalo" |
+           team == "Jacksonville" | team == "Cleveland") %>%
+  filter(wins >= 2.5)
+ggplot(data = standings_small, aes(x = wins, fill = team)) +
+  geom_bar() 
+```
+
+Above is a stacked bar plot that displays the counts of wins for three different NFL teams. This may not be a practical graph to construct, but it helps to convey the authors message concerning the baseline of comparison. Although it is easy to identify the general trend of the data, it is difficult to examine the individual trends for each category, or team. We can see the trend easily for Jacksonville, but not so much for Buffalo or Cleveland. This is because the observations for Jacksonville are on a stable baseline, while the observations for Buffalo and Cleveland are not. A graph that compares the wins of the teams on a stable baseline is provided below. 
+
+```{r}
+ggplot(data = standings_small, aes(x = wins)) +
+  geom_bar() +
+  facet_wrap(~team)
+```
+
+Here, it is easier to see the counts of wins for each team, as all of the observations are compared on the same baseline. 
+
+## Data Visualization Reading #2 
+
+The purpose of this section is to distinguish when it is appropriate to use a sequential and un-ordered color scale. In order to do so, a modified version of the ```pokemon_full``` data set is used, as well as the full data set later on. Some variables of interest include ```Speed```, ```Defense```,```weight```. ```height```, and ```Attack```, which refers to how powerful a Pokemon's move will be. 
+
+Our first step is to modify the data set so that we are only examining Bug, Water, Fire, and Grass Type Pokemon. 
+
+```{r}
+library(tidyverse)
+pokemon_small <- pokemon_full %>% filter(Type == "Bug" | Type == "Water" | Type == "Fire" | Type == "Grass")
+```
+
+The proper way to color by Type is by using a discrete colour scale. This is because Pokemon ```Type``` has no inherent order and can not be ordered in any way. ```Type``` is categorical, not numeric. 
+
+```{r}
+ggplot(data = pokemon_small, aes(x = Speed, y = Defense, color = Type)) +
+  geom_point() +
+  scale_colour_viridis_d(option = "plasma")
+```
+
+If you try to use ```scale_colour_viridis_c()```, the console will return an error that reads: Discrete value supplied to continuous scale. 
+
+Next, we will compare the relationship of weight and height. If we wanted to color by an ordered, numeric variable we would use ```scale_colour_viridis_c()``` or ```scale_colpur_viridis_b()```. An example of an ordered or numeric variable to color by from the ```pokemon_full``` data set includes ```Attack```. 
+
+```{r}
+ggplot(data = pokemon_full, aes(x = weight, y = height, colour = Attack)) +
+  geom_point() +
+  scale_colour_viridis_c(option = "plasma")
+```
+ 
+If we try to use ```scale_colour_viridis_d()```, the console will return this error: Continuous value supplied to discrete scale. 
+If we want to more clearly define the values of the legend, we would use ```scale_colour_viridis_b()```, which bins these values. 
+ 
+```{r}
+ggplot(data = pokemon_full, aes(x = weight, y = height, colour = Attack)) +
+  geom_point() +
+  scale_colour_viridis_b(option = "plasma")
+```
+
+```scale_colour_viridis_d()``` helps us color by discrete, or un-ordered categorical variables whereas ```scale_colour_viridis_c()``` and  ```scale_colour_viridis_b()``` help us to color by continuous, or ordered numeric variables. 

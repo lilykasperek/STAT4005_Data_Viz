@@ -1,0 +1,110 @@
+---
+title: "Midterm_Mini_Tutorial_3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Midterm Take Home
+
+Complete this exam in a .Rmd file. To turn in the exam, push 4 .Rmd files and 4 knitted .html files to your GitHub repository.
+
+__Statement of Integrity:__ Copy and paste the following statement into your first .Rmd file and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this exam.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may not communicate with or work with anyone else on this exam, but you may use any of our course materials or materials on the Internet.
+
+__Mini-Tutorial 3:__ Expressing Uncertainty (15 points)
+
+__Topics to Cover:__
+
+1. Incorporating Data Variability in Graphs
+
+Make sure to include:
+
+* (4 points) An introductory statement with the goal of the section (in your own words) and a brief description of the data set and variables you will be using.
+
+* (11 points) R code chunks interspersed with some text descriptions about the code you have written and with text description about each topic. For this section, you should actually make a graph (and not simply find an example already online like we looked at for hurricane graphs).
+
+## Incorporating Data Variability in Graphs 
+
+The purpose of this section is to demonstrate when it is appropriate to construct certain types of visualizations, as well as how to construct them. As a general rule, visualizations should be constructed so that the variability of the data is adequately displayed. A tutorial for how to express variability will be included below. To provide a demonstration of how to express variability, the ```tennis_df``` data set will be used. ```tennis_df``` is a combination of the ```atp_matches_2019``` and ```wta_matches_2019``` data sets, as provided in the course notes. Both data sets provide different characteristics of different professional tennis tournaments, as well as the characteristics of various players who competed in the tournaments. Some variables of interest include ```player```, which is the name of the players, and ```ace```, which refers to the amount of serves each player hits that can not be returned by their competitor. 
+
+```{r}
+library(tidyverse)
+atp_df <- read_csv("data/data/atp_matches_2019.csv")
+wta_df <- read_csv("data/wta_matches_2019.csv")
+both_df <- bind_rows(atp_df, wta_df)
+
+both_long <- both_df %>% pivot_longer(c(winner_name, loser_name))
+
+both_n50 <- both_long %>% group_by(value) %>% count() %>%
+  filter(n > 50)
+
+major_tennis <- semi_join(both_long, both_n50, by = c("value"))
+major_tennis <- major_tennis %>% mutate(w_svperc = 100 * w_1stIn / w_svpt,
+                        l_svperc = 100 * l_1stIn / l_svpt,
+                        w_firstwon = 100 * w_1stWon / w_1stIn,
+                        l_firstwon = 100 * l_1stWon / l_1stIn,
+                        w_secondwon = 100 * w_2ndWon / (w_svpt - w_1stIn),
+                        l_secondwon = 100 * l_2ndWon / (l_svpt - l_1stIn))
+major_tennis_w <- major_tennis %>% filter(name == "winner_name")
+major_tennis_l <- major_tennis %>% filter(name == "loser_name")
+
+w_small <- major_tennis_w %>% select(value, winner_seed, w_ace, w_df, w_svperc,
+                                     w_firstwon, w_secondwon) %>%
+  rename(seed = winner_seed, ace = w_ace, df = w_df, svperc = w_svperc,
+         firstwon = w_firstwon, secondwon = w_secondwon)
+
+l_small <- major_tennis_l %>% select(value, loser_seed, l_ace, l_df, l_svperc, l_firstwon, l_secondwon)  %>%
+  rename(seed = loser_seed, ace = l_ace, df = l_df, svperc = l_svperc,
+         firstwon = l_firstwon, secondwon = l_secondwon)
+
+tennis_df <- bind_rows(w_small, l_small) %>%
+  rename(player = "value")
+tennis_df
+```
+
+Before demonstrating how to construct a visualization that expresses variability, we should first look to an example that does not express variability, and develop an understanding of why this kind of visualization is problematic. 
+
+Say we wanted to examine the relationship between players and aces from ```tennis_df```. One common way of doing this may be to construct a bar plot that shows the average aces for each player. To construct this, we would create a new data set that filters out any missing values, use```group_by()``` to group by player, and then use ```summarise()``` to create an output of the average number of aces for each player. Then, we would use fct_reorder to create a new player variable that is ordered by player, so that the player with the highest average amount of aces is first, and the player with the least average amount of aces is last. In the code below, this data set is called ```tennis_avg```. To construct a plot, we would use ```geom_col```, so that the lengths of the bars represent the average number of aces for each player. We would also use ```coord_flip``` so that the names of players are easier to read. 
+
+```{r}
+tennis_avg <- tennis_df %>% 
+  filter(!is.na(ace)) %>%
+  group_by(player) %>%
+  summarise(avg = mean(ace)) %>% 
+  mutate(player = fct_reorder(.f = player, .x = avg))
+
+ggplot(data = tennis_avg, aes(x = player, y = avg)) +
+  geom_col() +
+  coord_flip()
+```
+
+The problem with this visualization is that it obscures much of the underlying data. Each player has multiple observations of the amount of aces they hit, and thus, a single mean is not truly representative of each players performance. To remedy this, we should construct a graph that shows all of the observations of aces for each player. To do this, we would still want to create a new data set that filters out any missing observations for aces, and order the data by player. However, this time, we would order the player variable by their total amount of aces rather than by their average amount of aces. This data set is called ```tennis_fix```. Instead of using ```geom_col```, we would use ```geom_point``` so that each observation from the data set is represented by a single point.
+
+```{r}
+tennis_fix <- tennis_df %>% 
+  filter(!is.na(ace)) %>% mutate(player = fct_reorder(.f = player, .x = ace))
+
+ggplot(data = tennis_fix, aes(x = player, y = ace)) +
+  geom_point() +
+  coord_flip() 
+```
+
+After implementing these changes, we can see that the order of the players has changed overall, even though the top three players remain the same. Nonetheless, this indicates that our bar plot may not have been accurately representing the data. Although we can now see the variability of the data, there is still more that could be done to enhance our visualization, as the current visualization may be overwhelming to most audiences. First, we could make points more transparent. We would do this within ```geom_point``` by adjusting alpha in the parentheses, which is adjusted to 0.5 in this example. This makes the less condensed points more transparent. We could also highlight the average aces for each player by using our data set from the first example, which we called ```tennis_avg```. We would do this by adding another ```geom_point```. We only specify y in the second geom because the x variable, player, is the same for both data sets and is already specified globally. We would then set colour to equal "Mean Ace" within the second geom. After this, we would add ```scale_colour_manual```, and set "Mean Ace" to red, so that the point representing the mean ace for each player is colored red.
+
+```{r}
+ggplot(data = tennis_fix, aes(x = player, y = ace)) +
+  geom_point(alpha = 0.5) +
+  coord_flip() +
+  geom_point(data = tennis_avg, aes(y = avg, colour = "Mean Ace")) +
+  scale_colour_manual(values = c("Mean Ace" = "red"))
+```
+
+One of the major takeaways from this section is that a bar plot is usually not an appropriate visualization when representing variability in data, as we saw in the first chunk of code. However, it is important to note that a bar plot is appropriate when visualizing the count of a categorical variable. Nonetheless, the scatter plot can be a good option for expressing variability, as it represents the observations from a data set as single points. 

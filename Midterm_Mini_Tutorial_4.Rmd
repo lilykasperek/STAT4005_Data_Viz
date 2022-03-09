@@ -1,0 +1,187 @@
+---
+title: "Midterm_Mini_Tutorial_4"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Midterm Take Home
+
+Complete this exam in a .Rmd file. To turn in the exam, push 4 .Rmd files and 4 knitted .html files to your GitHub repository.
+
+__Statement of Integrity:__ Copy and paste the following statement into your first .Rmd file and then sign your name (by typing it) on the line below.
+
+“All work presented is my own. I have not communicated with or worked with anyone else on this exam.”
+
+Lily Kasperek
+
+__Collaboration Reminder:__ You may not communicate with or work with anyone else on this exam, but you may use any of our course materials or materials on the Internet.
+
+__Mini-Tutorial 4:__ ```shiny``` (20 points)
+
+__Topics to Cover:__
+
+1. An Introduction to shiny
+
+2. An Introduction to Reactivity
+
+You should use a data set other than the data set you chose for the take-home quiz 6.
+
+Make Sure to Include:
+
+* (4 points) An introductory statement with the goal of the section (in your own words) and a brief description of the data set and variables you will be using.
+
+* (16 points) R code chunks interspersed with some text descriptions about the code you have written and with text description about each topic. At the end of this tutorial, the person reading it should be able to construct a shiny app with real data.
+
+## An Introduction to shiny - can't use slu majors, tennis, or hpi 
+
+The purpose of this section is to provide a step-by-step guide to on how to construct a basic app with two inputs and one output using ```shiny``` in RStudio. The data set being used is ```pokemon_full```, which is a data set that contains various characteristics of hundreds of different Pokemon. Some variables of interest include ```Type```, which specifies what kind of Pokemon each Pokemon is, ```Name```, the name of each Pokemon, and  ```HP```, which refers to the Hit Points of each Pokemon, the value that determines how much damage each Pokemon can receive. 
+
+__Step 1:__ Load in tidyverse and the data set. After this, create a new data set that comprises of one variable of interest. In this case, that variable is the Bug Type Pokemon. After this, create a plot using the new data set. In this case, we are creating a scatter plot that displays the ```HP``` of each Bug Type Pokemon. 
+
+```{r}
+library(tidyverse)
+pokemon_full <- read_csv("data/data/pokemon_full.csv")
+
+poke_sub <- pokemon_full %>% filter(Type == "Bug")
+
+ggplot(data = poke_sub, aes(x = Name, y = HP)) +
+  geom_point(alpha = 0.4) +
+  coord_flip() 
+```
+
+__Step 2:__ Use ```shinyapp``` to generate the basic structure of a shiny app, including the ui and server. Before we touch the server, we first have to set up our inputs in the UI. In this step, we will only focus on including one input, which will be ```Type```. Since we are planning on including two inputs, it makes sense to use ```sidebarLayout()```. For the first input, we will use ```selectizeInput``` so that the user can select Type from a list of all of the possible types. We will fill in our inputId and label, as well as the choices argument. Our inputId must be unique, and refers to what we input to create an output. In this case, our input is Type. The label is the message prompting us to select an input. The choices argument is the list of options we are choosing from. Run the app at this point to make sure it works. All that should appear is a select bar prompting you to choose a type, as well as a list of all of the possible types. Nothing should happen yet when type is selected. 
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseType",
+                label = "Choose a Type",
+                choices = factor(pokemon_full$Type))),
+    mainPanel()
+  )
+)
+
+server <- function(input, output, session) {
+  
+}
+
+shinyApp(ui, server)
+```
+
+__Step 3:__ After filling out our UI, we can move to filling out our server and work on our outputs. We first have to put the data set and plot we created in the first step in our server function. We must create a name for the plot we made, and in this case, it is named ```poke_plot```. Under this, we can include our output. In this case, our output Id is called ```pokegraph```. We then use renderPlot to render ```poke_plot```, the name we gave our plot from step 1. After this, we can move back to the UI. Within the mainPanel argument, we insert ```plotOutput()``` with our plot output Id in quotes, which in this case is pokegraph. We should run the code to make sure it works! After we run the code, we should see our select option on the left and the plot we made in step 1 on the right. The plot should not change yet even when we select a Pokemon type. 
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseType",
+                label = "Choose a Type",
+                choices = factor(pokemon_full$Type))),
+    mainPanel(plotOutput("pokegraph"))
+  )
+)
+
+server <- function(input, output, session) {
+  poke_sub <- pokemon_full %>% filter(Type == "Bug")
+  poke_plot <- ggplot(data = poke_sub, aes(x = Name, y = HP)) +
+  geom_point(alpha = 0.4) +
+  coord_flip() 
+  
+  output$pokegraph <- renderPlot({
+    poke_plot
+  })
+}
+
+shinyApp(ui, server)
+```
+
+__Step 4:__ Now that we have the code for our first input and output, we can modify the code so that the graph will change based on the Pokemon Type we select! This is where we can introduce the concept of __reactivity__. In this code chunk, we will create reactive expressions, which updates the output when we change the input. After we add reactive expressions in the code chunk below, our plot will change depending on the Pokemon Type we select. Before we make reactive expressions, we must edit the data set we created in step 1, as well as our plot. First, we should change ```Type == "Bug"``` to ```Type == input$chooseType```. Then, we should wrap the code, so that after the name of our data set, we insert reactive({, with our code inside the reactive expression }). After doing this, we must wrap our code for the plot in the same way, remove ```data =```, and add a set of parentheses after the name of the data set. We also have to add a set of parentheses after ```poke_plot``` as well. Now, the inputs and outputs should be connected, and we should run the code to make sure our output updates when we change the input! 
+
+```{r}
+library(shiny)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseType",
+                label = "Choose a Type",
+                choices = factor(pokemon_full$Type))),
+    mainPanel(plotOutput("pokegraph"))
+  )
+)
+
+server <- function(input, output, session) {
+  
+  poke_sub <- reactive({
+    pokemon_full %>% filter(Type == input$chooseType)
+  })
+  
+  poke_plot <- reactive({
+    ggplot(poke_sub(), aes(x = Name, y = HP)) +
+  geom_point(alpha = 0.4) +
+  coord_flip() 
+  })
+  
+  output$pokegraph <- renderPlot({
+    poke_plot()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+__Step 5:__ We have made an app with one input and one output! Now we will look at to how to create our second input using ```radioButtons```. First, we will insert ```radioButtons``` after ```selectizeInput```. We will create a new unique input Id and label. For the choices argument, we will bind values together that correspond to the names of different variables in the data set. We will use this in the choices argument to create our second input. After this, we will have to modify code in the server. First, we should add a mutate statement so that we can order the Pokemon when they appear on the graph. Next, we will replace ```HP``` with ```data[[input$varchoice]]``` so that our output will update when we select one of these new choices. Let's run this code to make sure our app works! 
+
+```{r}
+var_choices <- names(pokemon_full)[4:9]
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(selectizeInput(inputId = "chooseType",
+                label = "Choose a Type",
+                choices = factor(pokemon_full$Type),
+                selected = "Bug"),
+                radioButtons(inputId = "varchoice",
+                             label = "Choose a Variable",
+                             choices = var_choices)),
+    mainPanel(plotOutput("pokeplot"))
+  )
+)
+
+server <- function(input, output, session) {
+  
+ poke_sub <- reactive({
+   pokemon_full %>% filter(Type == input$chooseType) %>%
+     mutate(name = fct_reorder(.f = Name, .x = .data[[input$varchoice]]))
+ })
+
+  poke_plot <- reactive({
+  ggplot(poke_sub(), aes(x = name, y = .data[[input$varchoice]])) +
+  geom_point(alpha = 0.4) +
+  coord_flip() 
+  })
+  
+  output$pokeplot <- renderPlot({
+    poke_plot()
+    
+  })
+
+}
+
+shinyApp(ui, server)
+```
+
+We have now made a basic shiny app! Some important takeaways include:
+
+* It is important to check the shiny app as much as possible to make it easier to catch errors. 
+
+* Reactive expressions ( reactive({}) ) automatically update outputs when an input is changed. 
+
+* Going step by step is a good approach to creating a shiny app. 
